@@ -38,7 +38,6 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Properties;
 import java.util.PropertyPermission;
-import sun.reflect.Reflection;
 
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
@@ -72,7 +71,6 @@ public final class WildFlySecurityManager extends SecurityManager {
 
     private static final Field PD_STACK;
     private static final WildFlySecurityManager INSTANCE;
-    private static final boolean hasGetCallerClass;
     private static final int callerOffset;
 
     static {
@@ -82,15 +80,7 @@ public final class WildFlySecurityManager extends SecurityManager {
                 return new WildFlySecurityManager();
             }
         });
-        boolean result = false;
-        int offset = 0;
-        try {
-            result = Reflection.getCallerClass(1) == WildFlySecurityManager.class || Reflection.getCallerClass(2) == WildFlySecurityManager.class;
-            offset = Reflection.getCallerClass(1) == Reflection.class ? 2 : 1;
-
-        } catch (Throwable ignored) {}
-        hasGetCallerClass = result;
-        callerOffset = offset;
+        callerOffset = 0;
     }
 
     private WildFlySecurityManager() {
@@ -108,11 +98,7 @@ public final class WildFlySecurityManager extends SecurityManager {
     }
 
     static Class<?> getCallerClass(int n) {
-        if (hasGetCallerClass) {
-            return Reflection.getCallerClass(n + callerOffset);
-        } else {
-            return getCallStack()[n + callerOffset];
-        }
+        return getCallStack()[n + callerOffset];
     }
 
     static Class<?>[] getCallStack() {
@@ -334,12 +320,6 @@ public final class WildFlySecurityManager extends SecurityManager {
     public void checkMulticast(final InetAddress maddr) {
         if (CHECKING.get() == TRUE) {
             super.checkMulticast(maddr);
-        }
-    }
-
-    public void checkMulticast(final InetAddress maddr, final byte ttl) {
-        if (CHECKING.get() == TRUE) {
-            super.checkMulticast(maddr, ttl);
         }
     }
 
