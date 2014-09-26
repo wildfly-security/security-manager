@@ -111,17 +111,23 @@ public final class WildFlySecurityManager extends SecurityManager {
         callerOffset = offset;
     }
 
-    private WildFlySecurityManager() {
+    /**
+     * Construct a new instance.  If the caller does not have permission to do so, this method will throw an exception.
+     *
+     * @throws SecurityException if the caller does not have permission to create a security manager instance
+     */
+    public WildFlySecurityManager() throws SecurityException {
     }
 
     /**
      * Attempt to install this security manager.  If a security manager is installed already, then the caller
      * (and this class) must have sufficient permissions to replace it.
      */
+    @Deprecated
     public static void install() {
         final SecurityManager sm = System.getSecurityManager();
-        if (sm != INSTANCE) {
-            System.setSecurityManager(INSTANCE);
+        if (! (sm instanceof WildFlySecurityManager)) {
+            System.setSecurityManager(new WildFlySecurityManager());
         }
     }
 
